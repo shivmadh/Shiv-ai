@@ -1,0 +1,4 @@
+kivy
+speechrecognition
+pyttsx3
+wikipedia
