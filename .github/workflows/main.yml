@@ -45,12 +45,11 @@ jobs:
         yes | sdkmanager --licenses
         sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.2" "ndk;25.2.9519653"
 
-    # 4. Install Buildozer and build APK
+    # 4. Install Buildozer system-wide and build APK
     - name: Install Buildozer and Build APK
       run: |
-        python3 -m pip install --upgrade pip
-        python3 -m pip install --user buildozer cython
-        export PATH=$HOME/.local/bin:$PATH
+        sudo python3 -m pip install --upgrade pip
+        sudo python3 -m pip install buildozer cython
         export ANDROID_HOME=$HOME/Android/sdk
         export PATH=$ANDROID_HOME/cmdline-tools/tools/bin:$ANDROID_HOME/platform-tools:$PATH
         buildozer android debug
