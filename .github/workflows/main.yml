@@ -9,26 +9,32 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout
+    # 1. Checkout your repository
+    - name: Checkout repository
       uses: actions/checkout@v3
 
-    - name: Set up Buildozer with Docker
-      run: |
-        docker pull kivy/buildozer
-        docker run --rm -v ${{ github.workspace }}:/app -w /app kivy/buildozer ls -la
-        docker run --rm -v ${{ github.workspace }}:/app -w /app kivy/buildozer buildozer android debug
+    # 2. Set up Python
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
 
-    - name: Upload APK as Artifact
+    # 3. Install dependencies
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install buildozer cython
+
+    # 4. Build APK using Buildozer
+    - name: Build APK
+      uses: akhilgeek/buildozer-action@v1.0.5
+      with:
+        working-directory: .
+        command: android debug
+
+    # 5. Upload APK as artifact
+    - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: ShivAssistant-APK
+        name: ShivAI-APK
         path: bin/*.apk
-
-    - name: Release APK
-      uses: softprops/action-gh-release@v1
-      with:
-        tag_name: v${{ github.run_number }}
-        name: "ShivAssistant Release ${{ github.run_number }}"
-        files: bin/*.apk
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
