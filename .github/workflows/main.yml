@@ -13,13 +13,7 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    # 2. Set up Python
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
-
-    # 3. Install system dependencies
+    # 2. Install system dependencies
     - name: Install system dependencies
       run: |
         sudo apt update
@@ -39,13 +33,7 @@ jobs:
           libsqlite3-dev \
           wget
 
-    # 4. Install Buildozer and Cython
-    - name: Install Buildozer
-      run: |
-        pip install --upgrade pip
-        pip install buildozer cython
-
-    # 5. Set up Android SDK and NDK
+    # 3. Set up Android SDK and NDK
     - name: Set up Android SDK/NDK
       run: |
         mkdir -p $HOME/Android/cmdline-tools
@@ -57,14 +45,16 @@ jobs:
         yes | sdkmanager --licenses
         sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.2" "ndk;25.2.9519653"
 
-    # 6. Build APK
-    - name: Build APK
+    # 4. Install Buildozer and build APK
+    - name: Install Buildozer and Build APK
       run: |
+        pip install --upgrade pip
+        pip install buildozer cython
         export ANDROID_HOME=$HOME/Android/sdk
         export PATH=$ANDROID_HOME/cmdline-tools/tools/bin:$ANDROID_HOME/platform-tools:$PATH
         buildozer android debug
 
-    # 7. Upload APK as artifact
+    # 5. Upload APK as artifact
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
