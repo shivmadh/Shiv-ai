@@ -33,28 +33,29 @@ jobs:
           libsqlite3-dev \
           wget
 
-    # 3. Set up Android SDK and NDK
-    - name: Set up Android SDK/NDK
+    # 3. Set up Android SDK/NDK and Buildozer in a single step
+    - name: Set up Android and Build APK
       run: |
+        # Install Buildozer and Cython system-wide
+        sudo python3 -m pip install --upgrade pip
+        sudo python3 -m pip install buildozer cython
+
+        # Set up Android SDK/NDK
         mkdir -p $HOME/Android/cmdline-tools
         wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdline-tools.zip
         unzip cmdline-tools.zip -d $HOME/Android/cmdline-tools
         mkdir -p $HOME/Android/sdk
         export ANDROID_HOME=$HOME/Android/sdk
         export PATH=$ANDROID_HOME/cmdline-tools/tools/bin:$ANDROID_HOME/platform-tools:$PATH
+
+        # Accept SDK licenses and install required packages
         yes | sdkmanager --licenses
         sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.2" "ndk;25.2.9519653"
 
-    # 4. Install Buildozer system-wide and build APK
-    - name: Install Buildozer and Build APK
-      run: |
-        sudo python3 -m pip install --upgrade pip
-        sudo python3 -m pip install buildozer cython
-        export ANDROID_HOME=$HOME/Android/sdk
-        export PATH=$ANDROID_HOME/cmdline-tools/tools/bin:$ANDROID_HOME/platform-tools:$PATH
-        buildozer android debug
+        # Build APK using python module call
+        python3 -m buildozer android debug
 
-    # 5. Upload APK as artifact
+    # 4. Upload APK as artifact
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
