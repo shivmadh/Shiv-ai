@@ -48,8 +48,9 @@ jobs:
     # 4. Install Buildozer and build APK
     - name: Install Buildozer and Build APK
       run: |
-        pip install --upgrade pip
-        pip install buildozer cython
+        python3 -m pip install --upgrade pip
+        python3 -m pip install --user buildozer cython
+        export PATH=$HOME/.local/bin:$PATH
         export ANDROID_HOME=$HOME/Android/sdk
         export PATH=$ANDROID_HOME/cmdline-tools/tools/bin:$ANDROID_HOME/platform-tools:$PATH
         buildozer android debug
