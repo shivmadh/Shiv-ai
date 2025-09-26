@@ -1,13 +1,15 @@
 
 [app]
-title = Shiv Assistant
-package.name = shivassistant
+title = ShivAI
+package.name = shivai
 package.domain = org.shiv
 source.dir = .
 source.include_exts = py,png,jpg,kv,atlas
-requirements = python3,kivy,pyttsx3,speechrecognition,wikipedia
+version = 1.0.0
+requirements = python3,kivy
 orientation = portrait
 fullscreen = 0
+
 
 [buildozer]
 log_level = 2
