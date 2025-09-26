@@ -33,10 +33,11 @@ jobs:
           libsqlite3-dev \
           wget
 
-    # 3. Install Buildozer and Cython (without upgrading pip)
-    - name: Install Buildozer
-      run: |
-        sudo python3 -m pip install buildozer cython
+  # 3. Install Buildozer and Cython (user install)
+- name: Install Buildozer
+  run: |
+    python3 -m pip install --user buildozer cython
+    echo "$HOME/.local/bin" >> $GITHUB_PATH
 
     # 4. Set up Android SDK/NDK and Build APK in one step
     - name: Set up Android SDK/NDK and Build APK
