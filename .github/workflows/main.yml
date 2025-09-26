@@ -39,7 +39,7 @@ jobs:
           python3 -m pip install --user buildozer cython
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      # 4. Set up Android SDK/NDK and Build APK (single step so env persists)
+          # 4. Set up Android SDK/NDK and Build APK (single step so env persists)
       - name: Set up Android SDK/NDK and Build APK
         run: |
           mkdir -p $HOME/Android/cmdline-tools
@@ -47,7 +47,15 @@ jobs:
           unzip cmdline-tools.zip -d $HOME/Android/cmdline-tools
           mkdir -p $HOME/Android/sdk
           export ANDROID_HOME=$HOME/Android/sdk
-          export PATH=$ANDROID_HOME/cmdline-tools/tools/bin:$ANDROID_HOME/platform-tools:$PATH
+          export PATH=$HOME/Android/cmdline-tools/cmdline-tools/bin:$ANDROID_HOME/platform-tools:$PATH
+
+          # Accept licenses and install required SDK pieces
+          yes | sdkmanager --licenses
+          sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.2" "ndk;25.2.9519653"
+
+          # Build (verbose)
+          python3 -m buildozer -v android debug
+
 
           # Accept licenses and install required SDK pieces
           yes | sdkmanager --licenses
