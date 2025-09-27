@@ -2,69 +2,74 @@ name: Build and Release APK
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    # 1. Checkout repository
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      # 1. Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    # 2. Install system dependencies
-    - name: Install system dependencies
-      run: |
-        sudo apt update
-        sudo apt install -y \
-          build-essential \
-          python3-dev \
-          python3-pip \
-          git \
-          zip \
-          unzip \
-          default-jdk \
-          zlib1g-dev \
-          libncurses5-dev \
-          libstdc++6 \
-          libffi-dev \
-          libssl-dev \
-          libsqlite3-dev \
-          wget
+      # 2. Install system dependencies
+      - name: Install system dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y \
+            build-essential \
+            python3-dev \
+            python3-pip \
+            git \
+            zip \
+            unzip \
+            default-jdk \
+            zlib1g-dev \
+            libncurses5-dev \
+            libstdc++6 \
+            libffi-dev \
+            libssl-dev \
+            libsqlite3-dev \
+            wget
 
-    # 3. Install Buildozer and Cython
-    - name: Install Buildozer
-      run: |
-        python3 -m pip install --upgrade --user buildozer cython
+      # 3. Install Buildozer and Cython
+      - name: Install Buildozer
+        run: |
+          python3 -m pip install --user buildozer cython
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-    # 4. Set up Android SDK/NDK
-    - name: Set up Android SDK/NDK
-      run: |
-        mkdir -p $HOME/Android/cmdline-tools
-        wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdline-tools.zip
-        unzip cmdline-tools.zip -d $HOME/Android/cmdline-tools
+      # 4. Set up Android SDK/NDK and fix aidl
+      - name: Set up Android SDK/NDK
+        run: |
+          mkdir -p $HOME/Android/cmdline-tools
+          wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdline-tools.zip
+          unzip cmdline-tools.zip -d $HOME/Android/cmdline-tools
 
-        # Fix path: Google’s zip extracts into cmdline-tools/cmdline-tools/
-        export ANDROID_HOME=$HOME/Android/sdk
-        mkdir -p $ANDROID_HOME
-        export PATH=$HOME/Android/cmdline-tools/cmdline-tools/bin:$ANDROID_HOME/platform-tools:$PATH
+          export ANDROID_HOME=$HOME/Android/sdk
+          mkdir -p $ANDROID_HOME
+          export PATH=$HOME/Android/cmdline-tools/cmdline-tools/bin:$ANDROID_HOME/platform-tools:$PATH
 
-        # Accept licenses + install required packages
-        yes | $HOME/Android/cmdline-tools/cmdline-tools/bin/sdkmanager --licenses
-        $HOME/Android/cmdline-tools/cmdline-tools/bin/sdkmanager \
-          "platform-tools" "platforms;android-33" "build-tools;33.0.2" "ndk;25.2.9519653"
+          # Accept licenses and install required SDK packages
+          yes | $HOME/Android/cmdline-tools/cmdline-tools/bin/sdkmanager --licenses
+          $HOME/Android/cmdline-tools/cmdline-tools/bin/sdkmanager \
+            "platform-tools" "platforms;android-33" "build-tools;33.0.2" "ndk;25.2.9519653"
 
-    # 5. Build APK
-    - name: Build APK
-      run: |
-        export ANDROID_HOME=$HOME/Android/sdk
-        export PATH=$HOME/Android/cmdline-tools/cmdline-tools/bin:$ANDROID_HOME/platform-tools:$PATH
-        python3 -m buildozer -v android debug
+          # Symlink aidl so Buildozer can find it
+          BUILD_TOOLS_PATH=$ANDROID_HOME/build-tools/33.0.2
+          mkdir -p $BUILD_TOOLS_PATH
+          ln -s $HOME/Android/cmdline-tools/cmdline-tools/bin/aidl $BUILD_TOOLS_PATH/aidl
 
-    # 6. Upload APK as artifact
-    - name: Upload APK
-      uses: actions/upload-artifact@v4
-      with:
-        name: ShivAI-APK
-        path: bin/*.apk
+      # 5. Build APK
+      - name: Build APK
+        run: |
+          export ANDROID_HOME=$HOME/Android/sdk
+          export PATH=$HOME/Android/cmdline-tools/cmdline-tools/bin:$ANDROID_HOME/platform-tools:$PATH
+          python3 -m buildozer -v android debug
+
+      # 6. Upload APK artifact
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: ShivAI-APK
+          path: bin/*.apk
