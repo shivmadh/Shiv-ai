@@ -26,6 +26,7 @@ jobs:
               cp -r /root/bin/* /app/bin/ || true \
             "
 
+          # Fix ownership so GitHub Actions can upload the APK
           sudo chown -R $USER:$USER .buildozer bin || true
 
       - name: Upload APK
