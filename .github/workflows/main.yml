@@ -12,10 +12,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Build APK in Docker (root)
+      - name: Build APK inside Docker as root
         run: |
+          # Run container as root so Buildozer can write anywhere
           docker run --rm \
             -v $PWD:/app -w /app \
+            --user root \
             bodolsog/py3-kivy-buildozer \
             sh -c "\
               buildozer --verbose android debug || exit 1; \
@@ -24,7 +26,7 @@ jobs:
               cp -r /root/bin/* /app/bin/ || true \
             "
 
-          # Fix permissions so GitHub can upload artifacts
+          # Fix ownership so GitHub runner can upload the APK
           sudo chown -R $USER:$USER .buildozer bin || true
 
       - name: Upload APK
