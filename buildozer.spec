@@ -1,4 +1,3 @@
-
 [app]
 title = ShivAI
 package.name = shivai
@@ -9,8 +8,13 @@ version = 1.0.0
 requirements = python3,kivy
 orientation = portrait
 fullscreen = 0
-
-
-[buildozer]
-log_level = 2
-warn_on_root = 1
+android.permissions = INTERNET, ACCESS_NETWORK_STATE
+entrypoint = main.py
+android.api = 33
+android.ndk = 25.2.9519653
+android.minapi = 21
+android.sdk = 33
+android.build_tools_version = 33.0.2
+exclude_exts = txt,log,md
+copy_kv_to_bundle = True
+android.version_code = 1
