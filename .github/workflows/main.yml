@@ -1,21 +1,26 @@
-name: Build APK 
+name: Build and Release APK
 
 on:
   workflow_dispatch:
+  push:
+    branches: ["main"]
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Docker
-        run: |
-          docker pull bodolsog/py3-kivy-buildozer:latest
+      - name: Pull Buildozer Docker image
+        run: docker pull bodolsog/py3-kivy-buildozer:latest
 
-      - name: Build APK
+      - name: Build APK with Buildozer
         run: |
+          mkdir -p ${{ github.workspace }}/.buildozer
+          mkdir -p ${{ github.workspace }}/.gradle
+
           docker run --rm \
             -v ${{ github.workspace }}:/app \
             -v ${{ github.workspace }}/.buildozer:/home/user/.buildozer \
@@ -24,8 +29,17 @@ jobs:
             bodolsog/py3-kivy-buildozer:latest \
             buildozer -v android debug
 
-      - name: Upload APK
+      - name: Upload APK (artifact)
         uses: actions/upload-artifact@v4
         with:
           name: my-app-apk
           path: bin/*.apk
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.${{ github.run_number }}
+          name: "ShivAI APK v1.0.${{ github.run_number }}"
+          files: bin/*.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
