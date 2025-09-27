@@ -12,16 +12,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Build APK with Buildozer
+      - name: Build APK with Buildozer in Docker (fix permissions)
         run: |
+          USER_ID=$(id -u)
+          GROUP_ID=$(id -g)
           docker run --rm \
-            -v $PWD:/app -w /app \
+            -v ${{ github.workspace }}:/app -w /app \
             -e BUILDOZER_ALLOW_ROOT=1 \
             bodolsog/py3-kivy-buildozer \
-            bash -c "buildozer android debug && chown -R 1000:1000 /app"
+            bash -c "addgroup --gid $GROUP_ID appgroup && adduser --disabled-password --gecos '' --uid $USER_ID --gid $GROUP_ID appuser && chown -R appuser:appgroup /app && su appuser -c 'buildozer android debug'"
 
-      - name: Upload APK
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: ShivAI-APK
-          path: bin/*.apk
+          path: bin/*.
