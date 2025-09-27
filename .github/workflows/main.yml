@@ -50,9 +50,11 @@ jobs:
           mkdir -p $ANDROID_HOME
           export PATH=$HOME/Android/cmdline-tools/cmdline-tools/bin:$ANDROID_HOME/platform-tools:$PATH
 
-          # Accept licenses and install required SDK packages
-          yes | $HOME/Android/cmdline-tools/cmdline-tools/bin/sdkmanager --licenses
-          $HOME/Android/cmdline-tools/cmdline-tools/bin/sdkmanager \
+          # Force non-interactive license acceptance
+          export SDKMANAGER_OPTS="--licenses=accept"
+
+          # Install required SDK packages
+          yes | $HOME/Android/cmdline-tools/cmdline-tools/bin/sdkmanager \
             "platform-tools" "platforms;android-33" "build-tools;33.0.2" "ndk;25.2.9519653"
 
           # Symlink aidl so Buildozer can find it
