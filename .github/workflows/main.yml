@@ -13,36 +13,41 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Prepare directories
-        run: |
-          mkdir -p ${{ github.workspace }}/.buildozer
-          mkdir -p ${{ github.workspace }}/.gradle
-          mkdir -p ${{ github.workspace }}/bin   # FIX for /app/bin permission error
-
+      # Pull the latest Buildozer Docker image
       - name: Pull Buildozer Docker image
         run: docker pull bodolsog/py3-kivy-buildozer:latest
 
-      - name: Build APK with Buildozer
+      # Build APK inside Docker with correct user mapping
+      - name: Build APK
         run: |
+          # Create mapped directories in GitHub workspace
+          mkdir -p ${{ github.workspace }}/.buildozer
+          mkdir -p ${{ github.workspace }}/.gradle
+          mkdir -p ${{ github.workspace }}/bin
+
+          # Run Docker container as the current GitHub Actions user
           docker run --rm \
             -v ${{ github.workspace }}:/app \
             -v ${{ github.workspace }}/.buildozer:/home/user/.buildozer \
             -v ${{ github.workspace }}/.gradle:/home/user/.gradle \
             -w /app \
+            -u $(id -u):$(id -g) \
             bodolsog/py3-kivy-buildozer:latest \
             buildozer -v android debug
 
-      - name: Upload APK (artifact)
+      # Upload the APK artifact
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: my-app-apk
+          name: ShivAI-APK
           path: bin/*.apk
 
+      # Optional: create a GitHub Release with the APK
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v1.0.${{ github.run_number }}
-          name: ShivAI APK v1.0.${{ github.run_number }}
+          name: "ShivAI APK v1.0.${{ github.run_number }}"
           files: bin/*.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
