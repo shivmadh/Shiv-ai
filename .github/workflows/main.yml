@@ -14,9 +14,9 @@ jobs:
 
       - name: Build APK inside Docker as root
         run: |
-          # Run container as root so Buildozer can write anywhere
           docker run --rm \
             -v $PWD:/app -w /app \
+            -e BUILD_ROOT_USER_ALLOW=yes \
             --user root \
             bodolsog/py3-kivy-buildozer \
             sh -c "\
@@ -26,7 +26,6 @@ jobs:
               cp -r /root/bin/* /app/bin/ || true \
             "
 
-          # Fix ownership so GitHub runner can upload the APK
           sudo chown -R $USER:$USER .buildozer bin || true
 
       - name: Upload APK
