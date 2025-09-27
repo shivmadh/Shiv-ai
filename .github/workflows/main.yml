@@ -9,20 +9,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Build APK using Kivy Buildozer Docker image
       - name: Build APK in Docker
         run: |
           docker run --rm \
-            -v $PWD:/home/user/app -w /home/user/app \
-            -u 1000:1000 \
-            kivy/buildozer:python3.10 \
+            -v $PWD:/home/user/hostcwd -w /home/user/hostcwd \
+            -u $(id -u):$(id -g) \
+            kivy/buildozer \
             buildozer android debug
 
-      # 3. Upload APK as artifact
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
