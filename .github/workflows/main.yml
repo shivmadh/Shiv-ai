@@ -14,22 +14,17 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Prepare host folders
-        run: |
-          mkdir -p "${{ github.workspace }}/bin"
+        run: mkdir -p "${{ github.workspace }}/bin"
 
       - name: Pull Buildozer Docker image
         run: docker pull bodolsog/py3-kivy-buildozer:latest
 
       - name: Build APK with Buildozer (Docker)
         run: |
-          # Run buildozer inside the container.
-          # We map only the repo and the bin output folder to avoid permission issues.
           docker run --rm \
             -v "${{ github.workspace }}:/app" \
             -v "${{ github.workspace }}/bin:/app/bin" \
             -w /app \
-            -u 1000:1000 \
-            -e BUILDOZER_HOME=/home/user/.buildozer \
             bodolsog/py3-kivy-buildozer:latest \
             sh -c "buildozer -v android debug"
 
