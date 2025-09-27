@@ -13,19 +13,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Install Docker
-      - name: Install Docker
-        run: |
-          sudo apt update
-          sudo apt install -y docker.io
-
-      # 3. Build APK using Buildozer Docker
+      # 2. Build APK using Buildozer Docker
       - name: Build APK in Docker
         run: |
           docker run --rm -v $PWD:/app -w /app kivy/buildozer:latest \
             buildozer android debug
 
-      # 4. Upload APK artifact
+      # 3. Upload APK artifact
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
